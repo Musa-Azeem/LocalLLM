@@ -27,4 +27,4 @@ class LLMWrapper:
         )
     
     def create_chat_completion(self, messages):
-        return self.model.create_chat_completion(messages)
+        return self.model.create_chat_completion(messages, max_tokens=150)
