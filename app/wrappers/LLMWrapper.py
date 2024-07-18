@@ -4,7 +4,11 @@ from pathlib import Path
 
 class LLMWrapper:
     def __init__(self):
-        pass
+        self.app = None
+        self.cache_dir = None
+        self.model_name = None
+        self.model_gguf_file = None
+        self.model = None
 
     def init_app(self, app):
         self.app = app
