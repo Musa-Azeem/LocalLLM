@@ -28,4 +28,4 @@ class EmbeddingWrapper:
     
     def encode_query(self, sentences):
         prompt_name = "s2p_query"
-        return self.model.encode(sentences, prompt_name=prompt_name)
+        return self.model.encode(sentences, prompt_name=prompt_name, device='cuda')

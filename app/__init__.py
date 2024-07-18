@@ -2,7 +2,7 @@ from flask import Flask
 from app.LLM_module import blueprint as LLM_module
 from app.session_module import blueprint as session_module
 from config import Config
-from app.extensions import LLM, redis_client, embedding_model
+from app.extensions import LLM, redis_client, embedding_model, vector_db_client
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -15,6 +15,7 @@ def create_app(config_class=Config):
         redis_client.ping()
     except:
         raise Exception('Redis connection failed')
+    vector_db_client.init_app(app)
     LLM.init_app(app)
     embedding_model.init_app(app)
 

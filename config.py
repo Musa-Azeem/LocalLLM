@@ -11,6 +11,9 @@ class Config:
     REDIS_HOST = os.getenv('REDIS_HOST') or 'localhost'
     REDIS_PORT = os.getenv('REDIS_PORT') or 6379
 
+    QDRANT_HOST = os.getenv('QDRANT_HOST') or 'localhost'
+    QDRANT_PORT = os.getenv('QDRANT_PORT') or 6333
+
     MODEL_CACHE_DIR = os.getenv('MODEL_CACHE_DIR') or os.path.expanduser('~/.cache/huggingface/hub')
     MODEL_NAME = os.getenv('MODEL_NAME') or 'QuantFactory/Meta-Llama-3-8B-Instruct-GGUF-v2'
     MODEL_GGUF_FILE = os.getenv('MODEL_GGUF_FILE') or 'Meta-Llama-3-8B-Instruct-v2.Q3_K_L.gguf'

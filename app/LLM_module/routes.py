@@ -1,7 +1,7 @@
 from app.LLM_module import blueprint
 from flask import request
 from app.utils import validate_request
-from app.extensions import LLM, redis_client
+from app.extensions import LLM, redis_client, embedding_model, vector_db_client
 from flask import current_app
 
 @blueprint.route('/prompt', methods=['POST'])
@@ -38,6 +38,10 @@ def chat_completion():
     print(chats)
     try:
         response = LLM.create_chat_completion(messages=chats)
+        embedding = embedding_model.encode_query([message])
+        print(embedding.shape, embedding)
+        top_k = vector_db_client.search(embedding[0], top_k=5)
+        print(top_k)
     except:
         return dict(mssg='Chat completion failed'), 500
     
