@@ -2,7 +2,8 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from qdrant_client.http.exceptions import UnexpectedResponse
 
-COLLECTION_NAME = "LLM_embedding"
+DOC_COLLECTION_NAME = "context_docs"
+COLLECTION_NAME = "vector_entries"
 
 class VectorDBWrapper:
     def __init__(self):
@@ -32,3 +33,12 @@ class VectorDBWrapper:
             query_vector=vector,
             limit=top_k
         )
+    
+    def get_doc(self, doc_id):
+        doc = self.client.retrieve(
+            collection_name=DOC_COLLECTION_NAME, 
+            ids=[doc_id]
+        )
+        if len(doc) == 0:
+            return None
+        return doc[0]

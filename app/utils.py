@@ -14,3 +14,9 @@ def validate_request(request, fields):
         return False, {'mssg': 'missing fields', 'missingFields': empty_fields}
 
     return True, json_data
+
+def format_query(user_query, doc):
+    return (
+        f'DOCUMENT:\n{doc}\n'
+        f'USER QUESTION:\n{user_query}\n'
+    )

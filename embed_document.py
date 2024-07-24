@@ -9,6 +9,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 from qdrant_client.models import PointStruct
 from qdrant_client.http.exceptions import UnexpectedResponse
+import uuid
 nltk.download('punkt')
 
 MAX_TEXT_LEN = 512
@@ -17,7 +18,8 @@ EMB_DIM = 1024
 DEVICE = 'cuda'
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
-COLLECTION_NAME = "LLM_embedding"
+DOC_COLLECTION_NAME = 'context_docs'
+COLLECTION_NAME = "vector_entries"
 
 if len(sys.argv) < 3:
     print("Usage: python embed_document.py <path_to_html_file> <doc_url>")
@@ -30,7 +32,7 @@ print('Loading model...')
 model = SentenceTransformer(MODEL_NAME, trust_remote_code=True).to(DEVICE)
 client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
-# Parse HTML
+# ========================== Parse HTML ================================
 def parse_html(html):
     soup = BeautifulSoup(html, 'html.parser')
     header_text = soup.find('div', id='topic-header').find('h1').text.strip()
@@ -72,12 +74,34 @@ for section in text_sections:
                     entry = ''
                 entry += sentence
 
-# Embed entries
+# ========================== Embed entries =============================
 print('Embedding entries...')
 doc_embeddings = model.encode(entries, device="cuda")
 
-# Add entries to vector DB
-print('Adding entries to vector DB...')
+# ====================== Add entries to vector DB ======================
+print('Adding doc to DB...')
+try:
+    client.create_collection(
+        collection_name=DOC_COLLECTION_NAME,
+        vectors_config=VectorParams(size=1, distance=Distance.DOT)
+    )
+except UnexpectedResponse as e:
+    print(e)
+
+doc = '\n'.join(entries)
+doc_id = str(uuid.uuid4())
+
+operation_info = client.upsert(
+    collection_name=DOC_COLLECTION_NAME,
+    wait=True,
+    points=[PointStruct(
+        id=doc_id,
+        vector=[0],
+        payload={'text': doc, 'url': url}
+    )]
+)
+
+print('Adding vector entries to DB...')
 try:
     client.create_collection(
         collection_name=COLLECTION_NAME,
@@ -89,7 +113,10 @@ except UnexpectedResponse as e:
 points = [PointStruct(
     id=i, 
     vector=doc_embeddings[i],
-    payload={'text': entries[i], 'url': url}
+    payload={
+        'text': entries[i],
+        'doc_id': doc_id
+    }
 ) for i in range(len(entries))]
 
 operation_info = client.upsert(

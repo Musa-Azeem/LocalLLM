@@ -27,5 +27,6 @@ class EmbeddingWrapper:
         ).cuda()
     
     def encode_query(self, sentences):
-        prompt_name = "s2p_query"
+        prompt_name = "s2p_query" # Instruct: Given a web search query, retrieve relevant passages that answer the query.\nQuery: {query}
+        # prompt_name = "s2s_query" # Instruct: Retrieve semantically similar text.\nQuery: {query}
         return self.model.encode(sentences, prompt_name=prompt_name, device='cuda')

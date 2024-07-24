@@ -17,7 +17,7 @@ class LLMWrapper:
         self.model_gguf_file = app.config['MODEL_GGUF_FILE']
         if not Path(self.cache_dir / f'models--{self.model_name.replace("/","--")}').exists():
             print(f'Downloading {self.model_name}/{self.model_gguf_file} from Hugging Face Hub...')
-            hf_hub_download(self.model_name, cache_dir=self.cache_dir)
+            hf_hub_download(self.model_name, filename=self.model_gguf_file, cache_dir=self.cache_dir)
         else:
             print(f'Loading cached model: {self.model_name}/{self.model_gguf_file}...')
 
@@ -28,6 +28,7 @@ class LLMWrapper:
             n_gpu_layers=-1,
             chat_template="llama3",
             cache_dir=self.cache_dir,
+            n_ctx=32000,
         )
     
     def create_chat_completion(self, messages):
