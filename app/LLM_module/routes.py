@@ -48,6 +48,7 @@ def chat_completion():
             'role': 'user',
             'content': format_query(message, doc)
         })
+        print([len(chats['content']) for chats in chats])
         response = LLM.create_chat_completion(messages=chats)
     except Exception as e:
         print(e, type(e))

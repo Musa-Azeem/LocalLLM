@@ -2,6 +2,9 @@ from llama_cpp import Llama
 from huggingface_hub import hf_hub_download
 from pathlib import Path
 
+N_CTX = 2048
+MAX_TOKENS = 150
+
 class LLMWrapper:
     def __init__(self):
         self.app = None
@@ -28,8 +31,15 @@ class LLMWrapper:
             n_gpu_layers=-1,
             chat_template="llama3",
             cache_dir=self.cache_dir,
-            n_ctx=32000,
+            n_ctx=N_CTX,
         )
     
     def create_chat_completion(self, messages):
-        return self.model.create_chat_completion(messages, max_tokens=150)
+        return self.model.create_chat_completion(messages, max_tokens=MAX_TOKENS)
+    
+    # def stream_chat_completion(self, messages):
+    #     # With stream=True, the output is of type `Iterator[CompletionChunk]`.
+    #     output = self.model.create_completion(messages, max_tokens=MAX_TOKENS, stream=True)
+    #     # https://github.com/abetlen/llama-cpp-python/discussions/319
+
+    #     return output # generator object
