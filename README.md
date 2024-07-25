@@ -1,3 +1,7 @@
+# Setup
+- `python3 -m pip install -r req.txt`
+- `CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python`
+
 # Run App:
 
 - Start Redis Server: `docker run --name llm_redis -p 6379:6379 -it redis`

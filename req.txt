@@ -1,0 +1,7 @@
+flask
+huggingface_hub
+sentence_transformers
+redis
+qdrant_client
+python-dotenv
+xformers
