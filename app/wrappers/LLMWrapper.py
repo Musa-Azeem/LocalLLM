@@ -4,6 +4,7 @@ from pathlib import Path
 
 N_CTX = 2048
 MAX_TOKENS = 150
+N_GPU_LAYERS = 30
 
 class LLMWrapper:
     def __init__(self):
@@ -28,7 +29,7 @@ class LLMWrapper:
             repo_id=self.model_name,
             filename=self.model_gguf_file,
             verbose=False,
-            n_gpu_layers=-1,
+            n_gpu_layers=N_GPU_LAYERS,
             chat_template="llama3",
             cache_dir=self.cache_dir,
             n_ctx=N_CTX,

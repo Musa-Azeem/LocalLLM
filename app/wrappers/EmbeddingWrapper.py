@@ -2,6 +2,8 @@ from sentence_transformers import SentenceTransformer
 from huggingface_hub import hf_hub_download
 from pathlib import Path
 
+DEVICE = 'cuda'
+
 class EmbeddingWrapper:
     def __init__(self):
         self.app = None
@@ -23,10 +25,11 @@ class EmbeddingWrapper:
 
         self.model = SentenceTransformer(
             self.model_name, 
-            trust_remote_code=True
-        ).cuda()
+            trust_remote_code=True,
+            device=DEVICE
+        )
     
     def encode_query(self, sentences):
         prompt_name = "s2p_query" # Instruct: Given a web search query, retrieve relevant passages that answer the query.\nQuery: {query}
         # prompt_name = "s2s_query" # Instruct: Retrieve semantically similar text.\nQuery: {query}
-        return self.model.encode(sentences, prompt_name=prompt_name, device='cuda')
+        return self.model.encode(sentences, prompt_name=prompt_name, device=DEVICE)
