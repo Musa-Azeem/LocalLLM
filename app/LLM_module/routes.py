@@ -25,21 +25,13 @@ def chat():
     if not valid:
         return json_data, 400
     message = json_data['message']
+    if len(message) == 0:
+        return dict(mssg='Empty Query'), 400
+    
     chats = [{'role': 'system', 'content': current_app.config['SYSTEM_MESSAGE']}]
     
     try:
-        embedding = embedding_model.encode_query([message])
-        top_k = vector_db_client.search(embedding[0], top_k=1)
-        doc_id = top_k[0].payload['doc_id']
-        doc = vector_db_client.get_doc(doc_id)
-        if doc is None:
-            doc = 'No document'
-        chats.append({
-            'role': 'user',
-            'content': format_query(message, doc)
-        })
-        # print([len(chats['content']) for chats in chats])
-        response = LLM.create_chat_completion(messages=chats)
+        response = embed_query_and_generate(chats, message)
     except Exception as e:
         print(e, type(e))
         return dict(mssg='Chat completion failed'), 500
@@ -54,6 +46,9 @@ def chat_completion():
         return json_data, 400
     session_id = json_data['session_id']
     message = json_data['message']
+    if len(message) == 0:
+        return dict(mssg='Empty Query'), 400
+    
     chats = [{'role': 'system', 'content': current_app.config['SYSTEM_MESSAGE']}]
     
     try:
@@ -64,20 +59,7 @@ def chat_completion():
         return dict(mssg='Session not found'), 404
     
     try:
-        embedding = embedding_model.encode_query([message])
-        top_k = vector_db_client.search(embedding[0], top_k=1)
-        # if top_k.shape[0] == 0:
-            # response = LLM.create_chat_completion(messages=chats)
-        doc_id = top_k[0].payload['doc_id']
-        doc = vector_db_client.get_doc(doc_id)
-        if doc is None:
-            doc = 'No document'
-        chats.append({
-            'role': 'user',
-            'content': format_query(message, doc)
-        })
-        print([len(chats['content']) for chats in chats])
-        response = LLM.create_chat_completion(messages=chats)
+        response = embed_query_and_generate(chats, message)
     except Exception as e:
         print(e, type(e))
         return dict(mssg='Chat completion failed'), 500
@@ -90,3 +72,20 @@ def chat_completion():
     
     response = response['choices'][0]['message']['content']
     return dict(response=response), 200
+
+def embed_query_and_generate(chats, message):
+        embedding = embedding_model.encode_query([message])
+        top_k = vector_db_client.search(embedding[0], top_k=1)
+        if top_k is None:
+            doc = 'No document'
+        else:
+            doc_id = top_k[0].payload['doc_id']
+            doc = vector_db_client.get_doc(doc_id)
+            if doc is None:
+                doc = 'No document'
+        chats.append({
+            'role': 'user',
+            'content': format_query(message, doc)
+        })
+        response = LLM.create_chat_completion(messages=chats)
+        return response

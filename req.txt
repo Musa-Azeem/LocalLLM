@@ -5,3 +5,5 @@ redis
 qdrant_client
 python-dotenv
 xformers
+bs4
+nltk

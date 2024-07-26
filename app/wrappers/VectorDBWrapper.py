@@ -39,11 +39,14 @@ class VectorDBWrapper:
             print(f'Collection {self.doc_collection_name} already exists')
 
     def search(self, vector, top_k=5):
-        return self.client.search(
+        top_k = self.client.search(
             collection_name=self.collection_name, 
             query_vector=vector,
             limit=top_k
         )
+        if len(top_k) == 0:
+            return None
+        return top_k
     
     def get_doc(self, doc_id):
         doc = self.client.retrieve(
