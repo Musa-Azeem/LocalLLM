@@ -2,10 +2,6 @@ from llama_cpp import Llama
 from huggingface_hub import hf_hub_download
 from pathlib import Path
 
-N_CTX = 2048
-MAX_TOKENS = 150
-N_GPU_LAYERS = 30
-
 class LLMWrapper:
     def __init__(self):
         self.app = None
@@ -29,14 +25,17 @@ class LLMWrapper:
             repo_id=self.model_name,
             filename=self.model_gguf_file,
             verbose=False,
-            n_gpu_layers=N_GPU_LAYERS,
+            n_gpu_layers=app.config['MODEL_N_GPU_LAYERS'],
             chat_template="llama3",
             cache_dir=self.cache_dir,
-            n_ctx=N_CTX,
+            n_ctx=app.config['MODEL_N_CTX'],
         )
     
     def create_chat_completion(self, messages):
-        return self.model.create_chat_completion(messages, max_tokens=MAX_TOKENS)
+        return self.model.create_chat_completion(
+            messages, 
+            max_tokens=self.app.config['MODEL_MAX_TOKENS']
+        )
     
     # def stream_chat_completion(self, messages):
     #     # With stream=True, the output is of type `Iterator[CompletionChunk]`.
