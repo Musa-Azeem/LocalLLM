@@ -13,11 +13,12 @@ sidebar = soup.find('ul', id='manual-toc')
 
 urls = [a['href'] for a in sidebar.find_all('a', href=True)]
 urls = urls[1:100]
-
+print([f'{u}\n' for u in urls])
 for url in urls:
+    print(url)
     requests.post(
         'http://localhost:8000/embed_document',
         json={
-            'url': urls[0],
+            'url': url,
         }
     )

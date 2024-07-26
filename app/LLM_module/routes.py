@@ -31,13 +31,13 @@ def chat():
     chats = [{'role': 'system', 'content': current_app.config['SYSTEM_MESSAGE']}]
     
     try:
-        response = embed_query_and_generate(chats, message)
+        response, chosen_url, urls = embed_query_and_generate(chats, message)
     except Exception as e:
         print(e, type(e))
         return dict(mssg='Chat completion failed'), 500
     
-    response = response['choices'][0]['message']['content']
-    return dict(response=response), 200
+    
+    return dict(response=response, url=chosen_url, other_urls=urls), 200
 
 @blueprint.route('/chat_completion', methods=['POST'])
 def chat_completion():
@@ -59,7 +59,7 @@ def chat_completion():
         return dict(mssg='Session not found'), 404
     
     try:
-        response = embed_query_and_generate(chats, message)
+        response, chosen_url, urls = embed_query_and_generate(chats, message)
     except Exception as e:
         print(e, type(e))
         return dict(mssg='Chat completion failed'), 500
@@ -70,22 +70,30 @@ def chat_completion():
     except:
         return dict(mssg='Chat storage failed'), 500
     
-    response = response['choices'][0]['message']['content']
-    return dict(response=response), 200
+    return dict(response=response, url=chosen_url, other_urls=urls), 200
 
 def embed_query_and_generate(chats, message):
         embedding = embedding_model.encode_query([message])
-        top_k = vector_db_client.search(embedding[0], top_k=1)
-        if top_k is None:
-            doc = 'No document'
-        else:
-            doc_id = top_k[0].payload['doc_id']
-            doc = vector_db_client.get_doc(doc_id)
-            if doc is None:
-                doc = 'No document'
+        top_k = vector_db_client.search(embedding[0], top_k=current_app.config['SEARCH_TOP_K'])
+        text = 'No document'
+        chosen_url = None
+        urls = []
+        if top_k is not None:
+            for entry in top_k:
+                doc_id = entry.payload['doc_id']
+                doc = vector_db_client.get_doc(doc_id)
+                if doc:
+                    # if first match with a document, use text 
+                    if text == 'No document':
+                        text = doc.payload['text']
+                        chosen_url = doc.payload['url']
+                    else:
+                        # for all k, get the urls
+                        urls.append(doc.payload['url'])
         chats.append({
             'role': 'user',
-            'content': format_query(message, doc)
+            'content': format_query(message, text)
         })
         response = LLM.create_chat_completion(messages=chats)
-        return response
+        response = response['choices'][0]['message']['content']
+        return response, chosen_url, urls

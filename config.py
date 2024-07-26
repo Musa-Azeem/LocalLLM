@@ -12,7 +12,8 @@ class Config:
     QDRANT_HOST = os.getenv('QDRANT_HOST', 'localhost')
     QDRANT_PORT = os.getenv('QDRANT_PORT', 6333)
     DOC_COLLECTION_NAME = os.getenv('DOC_COLLECTION_NAME', 'context_docs')
-    COLLECTION_NAME = os.getenv('COLLECTION_NAME', 'vector_entries') 
+    COLLECTION_NAME = os.getenv('COLLECTION_NAME', 'vector_entries')
+    SEARCH_TOP_K = int(os.getenv('SEARCH_TOP_K', 5))
 
     MODEL_CACHE_DIR = os.getenv('MODEL_CACHE_DIR', os.path.expanduser('~/.cache/huggingface/hub'))
     MODEL_NAME = os.getenv('MODEL_NAME', 'QuantFactory/Meta-Llama-3.1-8B-Instruct-GGUF')
